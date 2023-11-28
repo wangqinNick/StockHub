@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wangqin.stock</groupId>
+        <artifactId>stock_parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>stock_common</artifactId>
+    <packaging>jar</packaging>
+    <description>
+        Project Description:
+        Common project for the Stock Management System, serving as a subproject under the stock_parent project. The
+        stock_common project is dedicated to maintaining shared code and resources for the broader Stock Management
+        System ecosystem. It encapsulates common functionalities essential for both the stock_backend primary business
+        project and the stock_job task project.
+
+        Key Features:
+        1. **Code Re-usability:** The stock_common project encapsulates shared code, promoting a modular and
+        maintainable
+        codebase across multiple projects within the Stock Management System.
+
+        2. **Resource Consolidation:** Common resources such as POJOs (Plain Old Java Objects), mappers, utilities,
+        constants, and other shared elements are centralized within stock_common. This consolidation enhances
+        consistency and reduces redundancy across the entire system.
+
+        3. **Seamless Integration:** Designed to seamlessly integrate with the stock_backend and stock_job projects, the
+        stock_common project ensures a unified development experience and facilitates efficient collaboration among
+        project teams.
+
+        Usage:
+        To include stock_common as a dependency in your Maven project, add the following dependency configuration to
+        your project's pom.xml file:
+
+    </description>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!--jackson相关注解，实现日期格式转换和类型格式转换并序列化等-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!--mybatis场景依赖-->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!--json工具包-->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <!--jode日期插件-->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+
+        <!--工具包-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!--分页插件-->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!--apache工具包-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!--配置提示-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+        </dependency>
+    </dependencies>
+
+
+</project>
