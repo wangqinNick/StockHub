@@ -16,6 +16,7 @@ public class R<T> implements Serializable {
     private static final int ERROR_CODE = 0;
 
     //状态码
+
     private int code;
     //消息
     private String msg;
