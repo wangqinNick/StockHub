@@ -5,6 +5,8 @@ import com.wangqin.stock.vo.request.LoginReqVo;
 import com.wangqin.stock.vo.response.LoginRespVo;
 import com.wangqin.stock.vo.response.R;
 
+import java.util.Map;
+
 public interface UserService {
 
     /**
@@ -20,4 +22,11 @@ public interface UserService {
      * @return response vo
      */
     R<LoginRespVo> login(LoginReqVo loginReqVo);
+
+    /**
+     * Generate image captcha, convert it to base64 format, and encapsulate it into a response class.
+     *
+     * @return 响应
+     */
+    R<Map> getCaptchaCode();
 }

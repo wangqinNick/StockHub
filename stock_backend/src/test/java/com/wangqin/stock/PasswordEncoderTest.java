@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootTest
-public class BackendTest {
+public class PasswordEncoderTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
