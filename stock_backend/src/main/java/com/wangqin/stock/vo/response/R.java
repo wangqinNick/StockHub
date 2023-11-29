@@ -1,10 +1,12 @@
 package com.wangqin.stock.vo.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
 
 import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@ApiModel(description = "Wrapper entity class for user login response")
 public class R<T> implements Serializable {
     private static final long serialVersionUID = 7735505903525411467L;
 

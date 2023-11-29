@@ -28,5 +28,5 @@ public interface UserService {
      *
      * @return 响应
      */
-    R<Map> getCaptchaCode();
+    R<Map<String, String>> getCaptchaCode();
 }

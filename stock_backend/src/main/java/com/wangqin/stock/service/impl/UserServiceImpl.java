@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
      * @return 响应
      */
     @Override
-    public R<Map> getCaptchaCode() {
+    public R<Map<String, String>> getCaptchaCode() {
         // 生成gif验证码
         GifCaptcha gifCaptcha = CaptchaUtil.createGifCaptcha(250, 40, 4);
         //LineCaptcha gifCaptcha = CaptchaUtil.createLineCaptcha(250, 40, 4, 5);

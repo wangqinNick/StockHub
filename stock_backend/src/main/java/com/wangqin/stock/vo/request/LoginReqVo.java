@@ -1,8 +1,10 @@
 package com.wangqin.stock.vo.request;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 @Data
+@ApiModel(description = "Wrapper entity class for user login request information")
 public class LoginReqVo {
     /**
      * 用户名
