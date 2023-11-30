@@ -2,25 +2,34 @@ package com.wangqin.stock.vo.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
 
 import java.io.Serializable;
 
+@ApiModel(description = "响应状态码")
+@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ApiModel(description = "Wrapper entity class for user login response")
 public class R<T> implements Serializable {
+    @ApiModelProperty(hidden = true)
     private static final long serialVersionUID = 7735505903525411467L;
 
     // 成功值,默认为1
+    @ApiModelProperty(value = "成功值,默认为1", position = 2)
     private static final int SUCCESS_CODE = 1;
     // 失败值,默认为0
+    @ApiModelProperty(value = "失败值,默认为0", position = 3)
     private static final int ERROR_CODE = 0;
 
     //状态码
 
-    private int code;
+    @ApiModelProperty(hidden = true)
+    private final int code;
     //消息
+    @ApiModelProperty(value = "消息", position = 5)
     private String msg;
     //返回数据
+    @ApiModelProperty(value = "返回数据", position = 6)
     private T data;
 
     private R(int code) {
@@ -75,15 +84,4 @@ public class R<T> implements Serializable {
         return new R<T>(res.getCode(), res.getMessage());
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public T getData() {
-        return data;
-    }
 }

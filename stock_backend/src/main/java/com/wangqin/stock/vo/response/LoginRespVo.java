@@ -9,33 +9,33 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@ApiModel("用户登录响应实体类")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ApiModel(description = "Wrapper entity class for user login response information")
 public class LoginRespVo {
     /**
      * 用户ID
      * 将Long类型数字进行json格式转化时，转成String格式类型
      */
+    @ApiModelProperty(value = "用户ID 将Long类型数字进行json格式转化时，转成String格式类型", position = 1)
     @JsonSerialize(using = ToStringSerializer.class)
-    @ApiModelProperty(value = "User's id, primary key in the database")
     private Long id;
     /**
      * 电话
      */
-    @ApiModelProperty(value = "User's phone number")
+    @ApiModelProperty(value = "电话", position = 2)
     private String phone;
     /**
      * 用户名
      */
-    @ApiModelProperty(value = "User's username")
+    @ApiModelProperty(value = "用户名", position = 3)
     private String username;
     /**
      * 昵称
      */
-    @ApiModelProperty(value = "User's nickname")
+    @ApiModelProperty(value = "昵称", position = 4)
     private String nickName;
 
 }
