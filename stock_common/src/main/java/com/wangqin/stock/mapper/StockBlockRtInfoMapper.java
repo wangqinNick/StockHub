@@ -1,6 +1,12 @@
 package com.wangqin.stock.mapper;
 
+import com.wangqin.stock.pojo.domain.InnerMarketDomain;
+import com.wangqin.stock.pojo.domain.StockBlockDomain;
 import com.wangqin.stock.pojo.entity.StockBlockRtInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
 
 /**
 * @author qinwang
@@ -22,4 +28,5 @@ public interface StockBlockRtInfoMapper {
 
     int updateByPrimaryKey(StockBlockRtInfo record);
 
+    List<StockBlockDomain> selectSectorAllLimit(@Param("timeStamp") Date timeStamp, @Param("length") int length);
 }

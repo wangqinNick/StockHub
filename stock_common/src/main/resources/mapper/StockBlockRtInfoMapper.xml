@@ -28,6 +28,21 @@
         from stock_block_rt_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
+    <select id="selectSectorAllLimit" resultType="com.wangqin.stock.pojo.domain.StockBlockDomain">
+        SELECT sbr.company_num  AS companyNum,
+               sbr.trade_amount AS tradeAmt,
+               sbr.label        AS code,
+               sbr.avg_price    AS avgPrice,
+               sbr.block_name   AS name,
+               sbr.cur_time     AS curDate,
+               sbr.trade_volume AS tradeVol,
+               sbr.updown_rate  AS updownRate
+        FROM stock_block_rt_info AS sbr
+        WHERE cur_time = #{timeStamp}
+        ORDER BY tradeVol DESC
+        LIMIT #{length};
+    </select>
+
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_block_rt_info
