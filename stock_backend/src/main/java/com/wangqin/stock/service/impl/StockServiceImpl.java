@@ -1,5 +1,7 @@
 package com.wangqin.stock.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wangqin.stock.mapper.StockBlockRtInfoMapper;
@@ -14,12 +16,16 @@ import com.wangqin.stock.utils.DateTimeUtil;
 import com.wangqin.stock.vo.response.PageResult;
 import com.wangqin.stock.vo.response.R;
 import com.wangqin.stock.vo.response.ResponseCode;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +39,7 @@ import static com.wangqin.stock.constant.StockConstant.MOCK_DATE;
  * @Description
  */
 @Service("stockService")
+@Slf4j
 public class StockServiceImpl implements StockService {
 
 
@@ -137,7 +144,7 @@ public class StockServiceImpl implements StockService {
      * @return R
      */
     @Override
-    public R<Map<String, List<Map<String, String>>>>  getStockUpDownCount() {
+    public R<Map<String, List<Map<String, String>>>> getStockUpDownCount() {
         // 1. 获取股票最新交易时间范围
         // 1.1 获取股票最新交易时间点
         DateTime curDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
@@ -161,5 +168,57 @@ public class StockServiceImpl implements StockService {
         upDownList.put("downList", downList);
 
         return R.ok(upDownList);
+    }
+
+    /**
+     * 将指定页的股票信息导出为Excel表
+     *
+     * @param response HttpResponse
+     * @param page     Page no.
+     * @param pageSize page size
+     */
+    @Override
+    public void stockExport(HttpServletResponse response, Integer page, Integer pageSize) {
+        try {
+            //1.获取最近最新的一次股票有效交易时间点（精确分钟）
+            Date curDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+            //因为对于当前来说，我们没有实现股票信息实时采集的功能，所以最新时间点下的数据
+            //在数据库中是没有的，所以，先临时指定一个假数据,后续注释掉该代码即可
+            // todo
+            curDate = DateTime.parse("2022-01-05 09:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+            //2.设置分页参数 底层会拦截mybatis发送的sql，并动态追加limit语句实现分页
+            log.debug("Page value: {}", page);
+            log.debug("PageSize value: {}", pageSize);
+            PageHelper.startPage(page, pageSize);
+            //3.查询
+            List<StockUpdownDomain> infos = stockRtInfoMapper.getNewestStockInfo(curDate);
+            //如果集合为空，响应错误提示信息
+            if (CollectionUtils.isEmpty(infos)) {
+                //响应提示信息
+                response.setCharacterEncoding("utf-8");
+                R<Object> r = R.error(ResponseCode.NO_RESPONSE_DATA);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("utf-8");
+                response.getWriter().write(new ObjectMapper().writeValueAsString(r));
+                return;
+            }
+            //设置响应excel文件格式类型
+            response.setContentType("application/vnd.ms-excel");
+            //2.设置响应数据的编码格式
+            response.setCharacterEncoding("utf-8");
+            //3.设置默认的文件名称
+            // 这里URLEncoder.encode可以防止中文乱码 当然和EasyExcel没有关系
+            String fileName = URLEncoder.encode("stockRt", "UTF-8");
+            //设置默认文件名称：兼容一些特殊浏览器
+            response.setHeader("content-disposition", "attachment;filename=" + fileName + ".xlsx");
+            //4.响应excel流
+            EasyExcel
+                    .write(response.getOutputStream(), StockUpdownDomain.class)
+                    .sheet("股票信息")
+                    .doWrite(infos);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("当前导出数据异常，当前页：{},每页大小：{},异常信息：{}", page, pageSize, e.getMessage());
+        }
     }
 }

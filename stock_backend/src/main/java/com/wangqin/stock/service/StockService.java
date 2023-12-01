@@ -7,6 +7,7 @@ import com.wangqin.stock.vo.response.PageResult;
 import com.wangqin.stock.vo.response.R;
 import io.swagger.annotations.ApiModel;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -50,5 +51,14 @@ public interface StockService {
      *
      * @return R
      */
-    R<Map<String, List<Map<String, String>>>>  getStockUpDownCount();
+    R<Map<String, List<Map<String, String>>>> getStockUpDownCount();
+
+    /**
+     * 将指定页的股票信息导出为Excel表
+     *
+     * @param response HttpResponse
+     * @param page     Page no.
+     * @param pageSize page size
+     */
+    void stockExport(HttpServletResponse response, Integer page, Integer pageSize);
 }

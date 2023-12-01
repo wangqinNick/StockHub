@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -65,8 +66,7 @@ public class StockController {
     })
     @ApiOperation(value = "分页查询沪深两市股票最新数据, 并按照涨幅排序", notes = "分页查询沪深两市股票最新数据, 并按照涨幅排序", httpMethod = "GET")
     @GetMapping("/stock/all")
-    public R<PageResult<StockUpdownDomain>> pagingStockInfo(@RequestParam(name = "page", required = false, defaultValue = "1") Integer pageNum,
-                                                            @RequestParam(name = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
+    public R<PageResult<StockUpdownDomain>> pagingStockInfo(@RequestParam(name = "page", required = false, defaultValue = "1") Integer pageNum, @RequestParam(name = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
         return stockService.pagingStockInfo(pageNum, pageSize);
     }
 
@@ -90,5 +90,24 @@ public class StockController {
     @GetMapping("/stock/updown/count")
     public R<Map<String, List<Map<String, String>>>> getStockUpDownCount() {
         return stockService.getStockUpDownCount();
+    }
+
+    /**
+     * 将指定页的股票信息导出为Excel表
+     *
+     * @param response HttpResponse
+     * @param page     Page no.
+     * @param pageSize page size
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "page", value = "Page no."),
+            @ApiImplicitParam(paramType = "query", dataType = "int", name = "pageSize", value = "page size")
+    })
+    @ApiOperation(value = "将指定页的股票信息导出为Excel表", notes = "将指定页的股票信息导出为Excel表", httpMethod = "GET")
+    @GetMapping("/stock/export")
+    public void stockExport(HttpServletResponse response,
+                            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                            @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
+        stockService.stockExport(response, page, pageSize);
     }
 }
