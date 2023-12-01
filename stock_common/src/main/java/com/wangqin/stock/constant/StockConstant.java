@@ -28,8 +28,14 @@ public class StockConstant {
     public static final String MOCK_DATE = "2021-12-21 09:30:00";
 
     /**
-     * 每页查询显示数量
+     * 涨幅榜更多->每页查询显示数量
      */
-    @ApiModelProperty(value = "每页查询显示数量", position = 4)
+    @ApiModelProperty(value = "涨幅榜更多->每页查询显示数量", position = 4)
     public static final int LIMIT = 10;
+
+    /**
+     * 股票涨幅榜显示数量
+     */
+    @ApiModelProperty(value = "股票涨幅榜显示数量", position = 5)
+    public static final int TOP_K = 4;
 }

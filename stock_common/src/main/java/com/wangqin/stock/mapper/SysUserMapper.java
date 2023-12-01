@@ -3,6 +3,8 @@ package com.wangqin.stock.mapper;
 import com.wangqin.stock.pojo.entity.SysUser;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author qinwang
  * @description 针对表【sys_user(用户表)】的数据库操作Mapper
@@ -24,4 +26,6 @@ public interface SysUserMapper {
     int updateByPrimaryKey(SysUser record);
 
     SysUser getByUsername(@Param("username") String name);
+
+    List<SysUser> selectAll();
 }
