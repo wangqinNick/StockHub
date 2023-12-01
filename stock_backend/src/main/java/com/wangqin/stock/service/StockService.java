@@ -61,4 +61,11 @@ public interface StockService {
      * @param pageSize page size
      */
     void stockExport(HttpServletResponse response, Integer page, Integer pageSize);
+
+    /**
+     * 统计A股大盘T日和T-1日成交量对比功能（成交量为沪深两市成交量之和）
+     *
+     * @return R
+     */
+    R<Map<String, List<Map<String, String>>>> getStockTradeAmt4InnerMarketCompared();
 }

@@ -33,11 +33,6 @@ import java.util.Map;
 
 import static com.wangqin.stock.constant.StockConstant.MOCK_DATE;
 
-/**
- * @author by itheima
- * @Date 2021/12/19
- * @Description
- */
 @Service("stockService")
 @Slf4j
 public class StockServiceImpl implements StockService {
@@ -54,6 +49,7 @@ public class StockServiceImpl implements StockService {
 
     @Autowired
     private StockRtInfoMapper stockRtInfoMapper;
+
 
     /**
      * 获取国内大盘的实时数据
@@ -220,5 +216,45 @@ public class StockServiceImpl implements StockService {
             e.printStackTrace();
             log.info("当前导出数据异常，当前页：{},每页大小：{},异常信息：{}", page, pageSize, e.getMessage());
         }
+    }
+
+    /**
+     * 统计A股大盘T日和T-1日成交量对比功能（成交量为沪深两市成交量之和）
+     *
+     * @return R
+     */
+    @Override
+    public R<Map<String, List<Map<String, String>>>> getStockTradeAmt4InnerMarketCompared() {
+
+        // 1.1 获取最近最新的一次股票有效交易时间点T（开始, 结束）
+        // T
+        DateTime end4TDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date end4T = end4TDateTime.toDate();
+        DateTime start4DateTime = DateTimeUtil.getOpenDate(end4TDateTime);
+        Date start4T = start4DateTime.toDate();
+        // 1.2 获取T-1日的时间点 (开始, 结束)
+        // T-1
+        DateTime end4T_DateTime = DateTimeUtil.getPreviousTradingDay(end4TDateTime);
+        Date end4T_ = end4T_DateTime.toDate();
+        DateTime start4DateTime_ = DateTimeUtil.getOpenDate(end4T_DateTime);
+        Date start4T_ = start4DateTime_.toDate();
+
+        // 因为对于当前来说，我们没有实现股票信息实时采集的功能，所以最新时间点下的数据
+        // 在数据库中是没有的，所以，先临时指定一个假数据,后续注释掉该代码即可
+        // todo
+        end4T = DateTime.parse("2022-01-03 14:40:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        start4T = DateTime.parse("2022-01-03 9:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        end4T_ = DateTime.parse("2022-01-02 14:40:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        start4T_ = DateTime.parse("2022-01-02 9:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+
+        // 2. 获取当前日从开盘到现在时间点的每分钟股市总交易量
+        List<Map<String, String>> amtInfo = stockMarketIndexInfoMapper.getStockTradeAmt4InnerMarket(start4T, end4T, stockInfoConfig.getInner());
+        List<Map<String, String>> yesAmtInfo = stockMarketIndexInfoMapper.getStockTradeAmt4InnerMarket(start4T_, end4T_, stockInfoConfig.getInner());
+        //
+        // 3. 封装响应
+        Map<String, List<Map<String, String>>> map = new HashMap<>();
+        map.put("amtList", amtInfo);
+        map.put("yesAmtList", yesAmtInfo);
+        return R.ok(map);
     }
 }

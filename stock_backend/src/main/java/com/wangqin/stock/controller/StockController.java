@@ -110,4 +110,15 @@ public class StockController {
                             @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize) {
         stockService.stockExport(response, page, pageSize);
     }
+
+    /**
+     * 统计A股大盘T日和T-1日成交量对比功能（成交量为沪深两市成交量之和）
+     *
+     * @return R
+     */
+    @ApiOperation(value = "统计A股大盘T日和T-1日成交量对比功能（成交量为沪深两市成交量之和）", notes = "统计A股大盘T日和T-1日成交量对比功能（成交量为沪深两市成交量之和）", httpMethod = "GET")
+    @GetMapping("/stock/tradeAmt")
+    public R<Map<String, List<Map<String, String>>>> stockTradeAmt4InnerMarketCompared() {
+        return stockService.getStockTradeAmt4InnerMarketCompared();
+    }
 }

@@ -51,6 +51,19 @@
         </foreach>
         AND smi.cur_time=#{timePoint}
     </select>
+    <select id="getStockTradeAmt4InnerMarket" resultType="map">
+        select
+        date_format(smi.cur_time,'%Y%m%d%H%i') as time,
+        sum(smi.trade_amount) as count
+        from stock_market_index_info as smi
+        where smi.market_code in
+        <foreach collection="marketCodes" item="marketCode" open="(" separator="," close=")">
+            #{marketCode}
+        </foreach>
+        and smi.cur_time between #{startDate} and #{endDate}
+        group by smi.cur_time
+        order by time asc;
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_market_index_info
