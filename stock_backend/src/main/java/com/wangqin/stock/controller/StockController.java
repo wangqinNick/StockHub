@@ -1,8 +1,6 @@
 package com.wangqin.stock.controller;
 
-import com.wangqin.stock.pojo.domain.InnerMarketDomain;
-import com.wangqin.stock.pojo.domain.StockBlockDomain;
-import com.wangqin.stock.pojo.domain.StockUpdownDomain;
+import com.wangqin.stock.pojo.domain.*;
 import com.wangqin.stock.service.StockService;
 import com.wangqin.stock.vo.response.PageResult;
 import com.wangqin.stock.vo.response.R;
@@ -132,5 +130,33 @@ public class StockController {
     @GetMapping("/stock/updown")
     public R<Map<String, Object>> getStockRangeCount() {
         return stockService.getStockRangeCount();
+    }
+
+    /**
+     * 查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；
+     * 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @ApiOperation(value = "查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据； 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点", notes = "查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据； 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点", httpMethod = "GET")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "code", value = "股票代码", required = true)
+    })
+    @GetMapping("/stock/screen/time-sharing")
+    public R<List<Stock4MinuteDomain>> getStockScreenTimeSharing(String code){
+        return stockService.getStockScreenTimeSharing(code);
+    }
+
+    /**
+     * 单个个股日K数据查询
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @ApiOperation(value = "单个个股日K数据查询", notes = "单个个股日K数据查询", httpMethod = "GET")
+    @GetMapping("/stock/screen/dkline")
+    public R<List<Stock4DayDomain>> getDayKLineData(String code) {
+        return stockService.getDayKLineData(code);
     }
 }

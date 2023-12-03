@@ -7,9 +7,7 @@ import com.github.pagehelper.PageInfo;
 import com.wangqin.stock.mapper.StockBlockRtInfoMapper;
 import com.wangqin.stock.mapper.StockMarketIndexInfoMapper;
 import com.wangqin.stock.mapper.StockRtInfoMapper;
-import com.wangqin.stock.pojo.domain.InnerMarketDomain;
-import com.wangqin.stock.pojo.domain.StockBlockDomain;
-import com.wangqin.stock.pojo.domain.StockUpdownDomain;
+import com.wangqin.stock.pojo.domain.*;
 import com.wangqin.stock.pojo.vo.StockInfoConfig;
 import com.wangqin.stock.service.StockService;
 import com.wangqin.stock.utils.DateTimeUtil;
@@ -321,5 +319,63 @@ public class StockServiceImpl implements StockService {
         mapInfo.put("infos", orderMaps);
         //4.返回数据
         return R.ok(mapInfo);
+    }
+
+    /**
+     * 查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；
+     * 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @Override
+    public R<List<Stock4MinuteDomain>> getStockScreenTimeSharing(String code) {
+        //1.获取最近最新的交易时间点和对应的开盘日期
+        //1.1 获取最近有效时间点
+        DateTime lastDate4Stock = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date endTime = lastDate4Stock.toDate();
+        //TODO mockdata
+        endTime=DateTime.parse("2021-12-30 14:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+
+        //1.2 获取最近有效时间点对应的开盘日期
+        DateTime openDateTime = DateTimeUtil.getOpenDate(lastDate4Stock);
+        Date startTime = openDateTime.toDate();
+        //TODO MOCK DATA
+        startTime=DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //2.根据股票code和日期范围查询
+        List<Stock4MinuteDomain> list=stockRtInfoMapper.getStockScreenTimeSharing(code,startTime,endTime);
+        //判断非空处理
+        if (CollectionUtils.isEmpty(list)) {
+            list=new ArrayList<>();
+        }
+        //3.返回响应数据
+        return R.ok(list);
+    }
+
+    /**
+     * 单个个股日K数据查询
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @Override
+    public R<List<Stock4DayDomain>> getDayKLineData(String code) {
+        // 1. 获取查询日期的范围
+        // 1.1 获取截止日期
+        DateTime endDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date endDate = endDateTime.toDate();
+
+        // 1.2 获取开始日期
+        DateTime startDateTime = endDateTime.minusDays(10);
+        Date startDate = startDateTime.toDate();
+
+        // todo
+        endDate=DateTime.parse("2022-06-06 14:25:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        startDate=DateTime.parse("2022-01-01 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+
+        // 2. SQL查询
+        List<Stock4DayDomain> infos = stockRtInfoMapper.getStockInfo4Day(code, startDate, endDate);
+
+        return R.ok(infos);
     }
 }

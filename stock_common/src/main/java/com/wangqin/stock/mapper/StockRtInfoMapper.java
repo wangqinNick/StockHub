@@ -1,5 +1,7 @@
 package com.wangqin.stock.mapper;
 
+import com.wangqin.stock.pojo.domain.Stock4DayDomain;
+import com.wangqin.stock.pojo.domain.Stock4MinuteDomain;
 import com.wangqin.stock.pojo.domain.StockUpdownDomain;
 import com.wangqin.stock.pojo.entity.StockRtInfo;
 import org.apache.ibatis.annotations.MapKey;
@@ -51,4 +53,27 @@ public interface StockRtInfoMapper {
      */
     @MapKey("title")
     List<Map<String, String>> getStockRangeCount(@Param("curDate") Date curDate);
+
+    /**
+     * 查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；
+     *
+     * @param code         股票代码
+     * @param openDateTime 开盘时间
+     * @param curDateTim   收盘/当前时间
+     * @return R
+     */
+    List<Stock4MinuteDomain> getStockScreenTimeSharing(@Param("code") String code,
+                                                       @Param("openDateTime") Date openDateTime,
+                                                       @Param("curDateTime") Date curDateTim);
+
+    /**
+     * 单个个股日K数据查询
+     *
+     * @param code      股票代码
+     * @param startDate 开始时间
+     * @param endDate   截止时间
+     */
+    List<Stock4DayDomain> getStockInfo4Day(@Param("code") String code,
+                                           @Param("startDate") Date startDate,
+                                           @Param("endDate") Date endDate);
 }
