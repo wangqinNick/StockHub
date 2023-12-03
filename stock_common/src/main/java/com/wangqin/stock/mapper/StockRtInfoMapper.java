@@ -41,6 +41,14 @@ public interface StockRtInfoMapper {
      */
     @MapKey("time")
     List<Map<String, String>> getStockUpdownCount(@Param("openDate") Date openDate,
-                                  @Param("curDate") Date curDate,
-                                  @Param("flag") int i);
+                                                  @Param("curDate") Date curDate,
+                                                  @Param("flag") int i);
+
+    /**
+     * 查询当前时间下股票的涨跌幅度区间统计功能
+     *
+     * @return List
+     */
+    @MapKey("title")
+    List<Map<String, String>> getStockRangeCount(@Param("curDate") Date curDate);
 }

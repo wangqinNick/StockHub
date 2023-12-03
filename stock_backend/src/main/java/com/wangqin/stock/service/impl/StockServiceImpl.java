@@ -26,10 +26,8 @@ import org.springframework.util.CollectionUtils;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.wangqin.stock.constant.StockConstant.MOCK_DATE;
 
@@ -256,5 +254,72 @@ public class StockServiceImpl implements StockService {
         map.put("amtList", amtInfo);
         map.put("yesAmtList", yesAmtInfo);
         return R.ok(map);
+    }
+
+    /**
+     * 查询当前时间下股票的涨跌幅度区间统计功能
+     * 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询点
+     *
+     * @return R
+     */
+    @Override
+    public R<Map<String, Object>> getStockRangeCount() {
+        // 1. 获取当前日期最近的时间点
+        DateTime curDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date curDate = curDateTime.toDate();
+        // todo
+        curDate = DateTime.parse("2022-01-06 09:55:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+
+        // 2. 数据库中查询
+        List<Map<String, String>> infos = stockRtInfoMapper.getStockRangeCount(curDate);
+//
+//        // 2.5 有序集合
+        List<String> orderSections = stockInfoConfig.getUpDownRange();
+//        List<Map<String, String>> orderInfos = new ArrayList<>();
+//
+//        for (String section :
+//                orderSections) {
+//            for (Map<String, String> info:
+//                 infos) {
+//                Map<String, String> map = null;
+//                if (info.containsValue(section)) {
+//                    orderInfos.add(info);
+//                } else {
+//                    map = new HashMap<>();
+//                    map.put("count", "0");
+//                    map.put("title", section);
+//                    orderInfos.add(map);
+//                }
+//            }
+//        }
+//
+//        // 3. 封装数据
+//        Map<String, Object> map = new HashMap<>();
+//        String curDateStr = new DateTime(curDate).toString(DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        map.put("time", curDateStr);
+//        map.put("infos", orderInfos);
+//        return R.ok(map);
+
+        List<Map> orderMaps = orderSections.stream().map(title -> {
+            Map mp = null;
+            Optional<Map<String, String>> op = infos.stream().filter(m -> m.containsValue(title)).findFirst();
+            //判断是否存在符合过滤条件的元素
+            if (op.isPresent()) {
+                mp = op.get();
+            } else {
+                mp = new HashMap();
+                mp.put("count", 0);
+                mp.put("title", title);
+            }
+            return mp;
+        }).collect(Collectors.toList());
+        //3.组装数据
+        HashMap<String, Object> mapInfo = new HashMap<>();
+        //获取指定日期格式的字符串
+        String curDateStr = new DateTime(curDate).toString(DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        mapInfo.put("time", curDateStr);
+        mapInfo.put("infos", orderMaps);
+        //4.返回数据
+        return R.ok(mapInfo);
     }
 }

@@ -2,6 +2,7 @@ package com.wangqin.stock.mapper;
 
 import com.wangqin.stock.pojo.domain.InnerMarketDomain;
 import com.wangqin.stock.pojo.entity.StockMarketIndexInfo;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -30,6 +31,7 @@ public interface StockMarketIndexInfoMapper {
 
     List<InnerMarketDomain> getMarketInfo(@Param("marketIds") List<String> marketIds, @Param("timePoint") Date timePoint);
 
+    @MapKey("time")
     List<Map<String, String>> getStockTradeAmt4InnerMarket(@Param("startDate") Date start4T,
                                                            @Param("endDate") Date end4T,
                                                            @Param("marketCodes") List<String> inner);
