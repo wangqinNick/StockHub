@@ -5,6 +5,7 @@ import com.wangqin.stock.pojo.entity.StockMarketIndexInfo;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,4 +36,12 @@ public interface StockMarketIndexInfoMapper {
     List<Map<String, String>> getStockTradeAmt4InnerMarket(@Param("startDate") Date start4T,
                                                            @Param("endDate") Date end4T,
                                                            @Param("marketCodes") List<String> inner);
+
+    /**
+     * 批量插入数据库数据
+     *
+     * @param list 大盘实体数据列表
+     * @return 影响行数
+     */
+    int insertBatch(@Param("list") ArrayList<StockMarketIndexInfo> list);
 }
