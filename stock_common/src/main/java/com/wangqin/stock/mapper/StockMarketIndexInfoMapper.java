@@ -43,5 +43,5 @@ public interface StockMarketIndexInfoMapper {
      * @param list 大盘实体数据列表
      * @return 影响行数
      */
-    int insertBatch(@Param("list") ArrayList<StockMarketIndexInfo> list);
+    int insertBatch(@Param("list") List<StockMarketIndexInfo> list);
 }

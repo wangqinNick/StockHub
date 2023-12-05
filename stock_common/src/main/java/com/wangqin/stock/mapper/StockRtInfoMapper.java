@@ -76,4 +76,12 @@ public interface StockRtInfoMapper {
     List<Stock4DayDomain> getStockInfo4Day(@Param("code") String code,
                                            @Param("startDate") Date startDate,
                                            @Param("endDate") Date endDate);
+
+    /**
+     * 批量插入个股数据
+     *
+     * @param list 个股数据集合
+     * @return 数据变动数量
+     */
+    int insertBatch(@Param("list") List<StockRtInfo> list);
 }

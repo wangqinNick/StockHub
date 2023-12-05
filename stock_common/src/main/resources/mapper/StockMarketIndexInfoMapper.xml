@@ -111,7 +111,7 @@
     </insert>
 
     <insert id="insertBatch">
-        insert into stock_market_index_info
+        insert IGNORE into stock_market_index_info
         ( id,market_code,market_name
         ,pre_close_point,open_point,cur_point
         ,min_point,max_point,trade_amount

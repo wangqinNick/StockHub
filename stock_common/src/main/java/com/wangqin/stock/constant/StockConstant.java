@@ -38,4 +38,13 @@ public class StockConstant {
      */
     @ApiModelProperty(value = "股票涨幅榜显示数量", position = 5)
     public static final int TOP_K = 4;
+
+    /**
+     * 分批采集个股数据样本大小
+     */
+    public static final int PARTITION_SIZE = 15;
+
+    public static final String REFERER_URL = "https://finance.sina.com.cn/stock/";
+
+    public static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
 }

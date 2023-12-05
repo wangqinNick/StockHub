@@ -19,4 +19,10 @@ public class StockTimerTaskServiceImplTest {
     public void test01() {
         stockTimerTaskService.getInnerMarketInfo();
     }
+
+    @Test
+    public void test02() {
+        stockTimerTaskService.getStockRtIndex();
+    }
+
 }
