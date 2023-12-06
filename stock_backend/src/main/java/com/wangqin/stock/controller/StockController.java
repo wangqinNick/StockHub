@@ -144,7 +144,7 @@ public class StockController {
             @ApiImplicitParam(paramType = "query", dataType = "string", name = "code", value = "股票代码", required = true)
     })
     @GetMapping("/stock/screen/time-sharing")
-    public R<List<Stock4MinuteDomain>> getStockScreenTimeSharing(String code){
+    public R<List<Stock4MinuteDomain>> getStockScreenTimeSharing(String code) {
         return stockService.getStockScreenTimeSharing(code);
     }
 

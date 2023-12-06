@@ -2,6 +2,7 @@ package com.wangqin.stock.service.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wangqin.stock.mapper.StockBlockRtInfoMapper;
@@ -14,6 +15,8 @@ import com.wangqin.stock.utils.DateTimeUtil;
 import com.wangqin.stock.vo.response.PageResult;
 import com.wangqin.stock.vo.response.R;
 import com.wangqin.stock.vo.response.ResponseCode;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -29,22 +32,32 @@ import java.util.stream.Collectors;
 
 import static com.wangqin.stock.constant.StockConstant.MOCK_DATE;
 
+@ApiModel
 @Service("stockService")
 @Slf4j
 public class StockServiceImpl implements StockService {
 
 
+    @ApiModelProperty(hidden = true)
     @Autowired
     private StockMarketIndexInfoMapper stockMarketIndexInfoMapper;
 
+    @ApiModelProperty(hidden = true)
     @Autowired
     private StockInfoConfig stockInfoConfig;
 
+    @ApiModelProperty(hidden = true)
     @Autowired
     private StockBlockRtInfoMapper stockBlockRtInfoMapper;
 
+    @ApiModelProperty(hidden = true)
     @Autowired
     private StockRtInfoMapper stockRtInfoMapper;
+
+    @ApiModelProperty(hidden = true)
+
+    @Autowired
+    private Cache<String,Object> caffeineCache;
 
 
     /**
@@ -54,16 +67,25 @@ public class StockServiceImpl implements StockService {
      */
     @Override
     public R<List<InnerMarketDomain>> innerIndexAll() {
-        //1.获取国内A股大盘的id集合
-        List<String> inners = stockInfoConfig.getInner();
-        //2.获取最近股票交易日期
-        Date lastDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
-        //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        lastDate = DateTime.parse("2021-12-28 09:31:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
-        //3.将获取的java Date传入接口
-        List<InnerMarketDomain> list = stockMarketIndexInfoMapper.getMarketInfo(inners, lastDate);
+        // 默认从本地缓存加载数据.
+        // 如果不存在, 则从数据库加载, 并同步到本地缓存
+        // 本地缓存默认有效期一分钟(开盘周期内)
+        @SuppressWarnings("unchecked")
+        R<List<InnerMarketDomain>> data= (R<List<InnerMarketDomain>>) caffeineCache.get("innerMarketInfos", key->{
+            // 补救策略
+            //1.获取国内A股大盘的id集合
+            List<String> inners = stockInfoConfig.getInner();
+            //2.获取最近股票交易日期
+            Date lastDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+            //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
+            lastDate = DateTime.parse("2021-12-28 09:31:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+            //3.将获取的java Date传入接口
+            List<InnerMarketDomain> list = stockMarketIndexInfoMapper.getMarketInfo(inners, lastDate);
+            return R.ok(list);
+        });
+
         //4.返回查询结果
-        return R.ok(list);
+        return data;
     }
 
     /**

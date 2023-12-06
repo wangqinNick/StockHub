@@ -3,9 +3,11 @@ package com.wangqin.stock.service.impl;
 import com.google.common.collect.Lists;
 import com.wangqin.stock.constant.ParseType;
 import com.wangqin.stock.constant.StockConstant;
+import com.wangqin.stock.mapper.StockBlockRtInfoMapper;
 import com.wangqin.stock.mapper.StockBusinessMapper;
 import com.wangqin.stock.mapper.StockMarketIndexInfoMapper;
 import com.wangqin.stock.mapper.StockRtInfoMapper;
+import com.wangqin.stock.pojo.entity.StockBlockRtInfo;
 import com.wangqin.stock.pojo.entity.StockMarketIndexInfo;
 import com.wangqin.stock.pojo.entity.StockRtInfo;
 import com.wangqin.stock.pojo.vo.StockInfoConfig;
@@ -15,6 +17,7 @@ import com.wangqin.stock.utils.ParserStockInfoUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +55,12 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
 
     @Autowired
     private StockRtInfoMapper stockRtInfoMapper;
+
+    @Autowired
+    private StockBlockRtInfoMapper stockBlockRtInfoMapper;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     // StockTimerTaskServiceImpl 这个Bean创建的时候创建httpEntity
     private HttpEntity<Object> httpEntity;
@@ -82,22 +92,30 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         }
 
         String jsData = responseEntity.getBody();
-        log.info("当前时间: {}, 采集大盘数据: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), jsData);
 
         // 3 解析数据
         List<StockMarketIndexInfo> list = parserStockInfoUtil.parser4StockOrMarketInfo(jsData, ParseType.INNER);
 
         // 收集大盘数据入集合
-        log.info("采集的当前大盘数据：{}", list);
+        log.info("当前时间:{}, 采集的当前大盘数据：{}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
         //批量插入
         if (CollectionUtils.isEmpty(list)) {
             return;
         }
 
-        // 4 使用 myBatis Mapper 批量入库
+        // 4 使用 myBatis Mapper 批量入库, 即采集完毕
         int count = stockMarketIndexInfoMapper.insertBatch(list);
-        if (count > 0)
+
+
+        if (count > 0){
             log.info("当前时间: {}, 成功插入{}条大盘数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
+            // 大盘数据采集、插入完毕后, 通知backend模块刷新缓存
+            // 数据库 -> 缓存
+            rabbitTemplate.convertAndSend("stockExchange","inner.market",new Date());
+
+        }
+
+
         else log.error("当前时间: {}, 插入大盘数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
     }
 
@@ -136,5 +154,32 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
             else log.error("当前时间: {}, 插入个股数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
 
         });
+    }
+
+    /**
+     * 板块实时数据采集
+     */
+    @Override
+    public void getBlockIndex() {
+        // 1. 组装采集的URL
+        String url = stockInfoConfig.getBlockUrl();
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, this.httpEntity, String.class);
+        int statusCodeValue = responseEntity.getStatusCodeValue();
+        if (statusCodeValue != 200) {
+            log.error("当前时间: {}, 采集板块数据出现问题, HTTP状态码: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), statusCodeValue);
+            return;
+        }
+        String jsData = responseEntity.getBody();
+        List<StockBlockRtInfo> list = parserStockInfoUtil.parse4StockBlock(jsData);
+        log.info("采集的当前板块数据：{}", list);
+        //批量插入
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+        // 4 使用 myBatis Mapper 批量入库
+        int count = stockBlockRtInfoMapper.insertBatch(list);
+        if (count > 0)
+            log.info("当前时间: {}, 成功插入{}条板块数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
+        else log.error("当前时间: {}, 插入板块数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
     }
 }

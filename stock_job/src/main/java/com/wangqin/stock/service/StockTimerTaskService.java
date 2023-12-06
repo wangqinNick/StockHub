@@ -10,4 +10,9 @@ public interface StockTimerTaskService {
      * 定义获取分钟级(个)股票数据
      */
     void getStockRtIndex();
+
+    /**
+     * 板块实时数据采集
+     */
+    void getBlockIndex();
 }

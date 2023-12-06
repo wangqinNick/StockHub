@@ -1,5 +1,7 @@
 package com.wangqin.stock.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.wangqin.stock.pojo.vo.StockInfoConfig;
 import com.wangqin.stock.utils.IdWorker;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,8 +24,14 @@ public class CommonConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * 配置雪花编号器
+     *
+     * @return IdWorker
+     */
     @Bean
     public IdWorker idWorker() {
         return new IdWorker(1L, 1L);    // no.1 machine, no.1 datacenter
     }
 }
+

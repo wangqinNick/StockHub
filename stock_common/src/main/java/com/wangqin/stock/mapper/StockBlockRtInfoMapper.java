@@ -29,4 +29,12 @@ public interface StockBlockRtInfoMapper {
     int updateByPrimaryKey(StockBlockRtInfo record);
 
     List<StockBlockDomain> selectSectorAllLimit(@Param("timeStamp") Date timeStamp, @Param("length") int length);
+
+    /**
+     * 批量插入板块实时数据
+     *
+     * @param list 板块实时数据
+     * @return 受影响行数
+     */
+    int insertBatch(@Param("list") List<StockBlockRtInfo> list);
 }
