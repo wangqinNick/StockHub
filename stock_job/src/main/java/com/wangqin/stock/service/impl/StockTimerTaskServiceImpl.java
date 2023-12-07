@@ -107,14 +107,12 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         int count = stockMarketIndexInfoMapper.insertBatch(list);
 
 
-        if (count > 0){
+        if (count > 0) {
             log.info("当前时间: {}, 成功插入{}条大盘数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
             // 大盘数据采集、插入完毕后, 通知backend模块刷新缓存
             // 数据库 -> 缓存
-            rabbitTemplate.convertAndSend("stockExchange","inner.market",new Date());
-        }
-
-        else log.error("当前时间: {}, 插入大盘数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            rabbitTemplate.convertAndSend("stockTopicExchange", "inner.market", new Date());
+        } else log.error("当前时间: {}, 插入大盘数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
     }
 
     /**
@@ -147,9 +145,10 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
 
             // 3 批量插入
             int count = stockRtInfoMapper.insertBatch(list);
-            if (count > 0)
+            if (count > 0) {
                 log.info("当前时间: {}, 成功插入{}条个股数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
-            else log.error("当前时间: {}, 插入个股数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+                rabbitTemplate.convertAndSend("stockTopicExchange", "inner.stock", new Date());
+            } else log.error("当前时间: {}, 插入个股数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
 
         });
     }

@@ -57,7 +57,7 @@ public class StockServiceImpl implements StockService {
     @ApiModelProperty(hidden = true)
 
     @Autowired
-    private Cache<String,Object> caffeineCache;
+    private Cache<String, Object> caffeineCache;
 
 
     /**
@@ -71,7 +71,7 @@ public class StockServiceImpl implements StockService {
         // 如果不存在, 则从数据库加载, 并同步到本地缓存
         // 本地缓存默认有效期一分钟(开盘周期内)
         @SuppressWarnings("unchecked")
-        R<List<InnerMarketDomain>> data= (R<List<InnerMarketDomain>>) caffeineCache.get("innerMarketInfos", key->{
+        R<List<InnerMarketDomain>> data = (R<List<InnerMarketDomain>>) caffeineCache.get("innerMarketInfos", key -> {
             // 补救策略
             //1.获取国内A股大盘的id集合
             List<String> inners = stockInfoConfig.getInner();
@@ -114,21 +114,26 @@ public class StockServiceImpl implements StockService {
      */
     @Override
     public R<PageResult<StockUpdownDomain>> pagingStockInfo(Integer pageNum, Integer pageSize) {
-        //1.设置PageHelper分页参数
-        PageHelper.startPage(pageNum, pageSize);
-        //2.获取当前最新的股票交易时间点
-        Date curDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
-        //todo
-        curDate = DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
-        //3.调用mapper接口查询
-        List<StockUpdownDomain> infos = stockRtInfoMapper.getNewestStockInfo(curDate);
-        if (CollectionUtils.isEmpty(infos)) {
-            return R.error(ResponseCode.NO_RESPONSE_DATA);
-        }
-        // 4.组装PageInfo对象，获取分页的具体信息,因为PageInfo包含了丰富的分页信息，而部分分页信息是前端不需要的
-        PageResult<StockUpdownDomain> pageResult = new PageResult<>(new PageInfo<>(infos));
-        //5.封装响应数据
-        return R.ok(pageResult);
+
+        @SuppressWarnings("unchecked")
+        R<PageResult<StockUpdownDomain>> data = (R<PageResult<StockUpdownDomain>>) caffeineCache.get("stockInfosKey", key -> {
+            //1.设置PageHelper分页参数
+            PageHelper.startPage(pageNum, pageSize);
+            //2.获取当前最新的股票交易时间点
+            Date curDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+            //todo
+            curDate = DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+            //3.调用mapper接口查询
+            List<StockUpdownDomain> infos = stockRtInfoMapper.getNewestStockInfo(curDate);
+            if (CollectionUtils.isEmpty(infos)) {
+                return R.error(ResponseCode.NO_RESPONSE_DATA);
+            }
+            // 4.组装PageInfo对象，获取分页的具体信息,因为PageInfo包含了丰富的分页信息，而部分分页信息是前端不需要的
+            PageResult<StockUpdownDomain> pageResult = new PageResult<>(new PageInfo<>(infos));
+            //5.封装响应数据
+            return R.ok(pageResult);
+        });
+        return data;
     }
 
     /**
@@ -357,18 +362,18 @@ public class StockServiceImpl implements StockService {
         DateTime lastDate4Stock = DateTimeUtil.getLastDate4Stock(DateTime.now());
         Date endTime = lastDate4Stock.toDate();
         //TODO mockdata
-        endTime=DateTime.parse("2021-12-30 14:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        endTime = DateTime.parse("2021-12-30 14:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
 
         //1.2 获取最近有效时间点对应的开盘日期
         DateTime openDateTime = DateTimeUtil.getOpenDate(lastDate4Stock);
         Date startTime = openDateTime.toDate();
         //TODO MOCK DATA
-        startTime=DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        startTime = DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
         //2.根据股票code和日期范围查询
-        List<Stock4MinuteDomain> list=stockRtInfoMapper.getStockScreenTimeSharing(code,startTime,endTime);
+        List<Stock4MinuteDomain> list = stockRtInfoMapper.getStockScreenTimeSharing(code, startTime, endTime);
         //判断非空处理
         if (CollectionUtils.isEmpty(list)) {
-            list=new ArrayList<>();
+            list = new ArrayList<>();
         }
         //3.返回响应数据
         return R.ok(list);
@@ -392,8 +397,8 @@ public class StockServiceImpl implements StockService {
         Date startDate = startDateTime.toDate();
 
         // todo
-        endDate=DateTime.parse("2022-06-06 14:25:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
-        startDate=DateTime.parse("2022-01-01 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        endDate = DateTime.parse("2022-06-06 14:25:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        startDate = DateTime.parse("2022-01-01 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
 
         // 2. SQL查询
         List<Stock4DayDomain> infos = stockRtInfoMapper.getStockInfo4Day(code, startDate, endDate);

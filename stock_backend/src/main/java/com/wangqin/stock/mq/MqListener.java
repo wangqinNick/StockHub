@@ -18,23 +18,24 @@ import java.util.Date;
 public class MqListener {
 
     @Autowired
-    private Cache<String,Object> caffeineCache;
+    private Cache<String, Object> caffeineCache;
 
     @Autowired
     private StockService stockService;
 
     /**
+     * 同步国内大盘信息
      *
-     * @param date
-     * @throws Exception
+     * @param date 发布者发送消息时间
+     * @throws Exception e
      */
     @RabbitListener(queues = "innerMarketQueue")
-    public void acceptInnerMarketInfo(Date date)throws Exception{
+    public void acceptInnerMarketInfo(Date date) throws Exception {
         //获取时间毫秒差值
-        long diffTime= DateTime.now().getMillis()-new DateTime(date).getMillis();
+        long diffTime = DateTime.now().getMillis() - new DateTime(date).getMillis();
         //超过一分钟告警
-        if (diffTime>60000) {
-            log.error("采集国内大盘时间点：{},同步超时：{}ms",new DateTime(date).toString("yyyy-MM-dd HH:mm:ss"),diffTime);
+        if (diffTime > 60000) {
+            log.error("采集国内大盘时间点：{}, 同步超时：{}ms", new DateTime(date).toString("yyyy-MM-dd HH:mm:ss"), diffTime);
         }
         //将缓存置为失效删除
         caffeineCache.invalidate("innerMarketInfosKey");
@@ -42,4 +43,23 @@ public class MqListener {
         stockService.innerIndexAll();
     }
 
+    /**
+     * 同步A股个股信息
+     *
+     * @param date 发布者发送消息时间
+     * @throws Exception e
+     */
+    @RabbitListener(queues = "stockQueue")
+    public void acceptStockInfo(Date date) throws Exception {
+        //获取时间毫秒差值
+        long diffTime = DateTime.now().getMillis() - new DateTime(date).getMillis();
+        //超过一分钟告警
+        if (diffTime > 60000) {
+            log.error("采集国内个股时间点：{}, 同步超时：{}ms", new DateTime(date).toString("yyyy-MM-dd HH:mm:ss"), diffTime);
+        }
+        //将缓存置为失效删除
+        caffeineCache.invalidate("stockInfosKey");
+        //调用服务更新缓存
+        stockService.innerIndexAll();
+    }
 }
