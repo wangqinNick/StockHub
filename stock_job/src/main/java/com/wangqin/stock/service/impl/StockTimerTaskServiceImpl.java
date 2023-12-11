@@ -23,6 +23,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,6 +62,9 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     // StockTimerTaskServiceImpl 这个Bean创建的时候创建httpEntity
     private HttpEntity<Object> httpEntity;
@@ -127,29 +131,31 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         // 1.2 每15只股票拆分为一组, 分批次拉取数据
         List<List<String>> partitions = Lists.partition(allStockCodesWithSuffix, StockConstant.PARTITION_SIZE);
         partitions.forEach(codes -> {
-            String url = stockInfoConfig.getMarketUrl() + String.join(",", codes);
+            // 线程池执行
+            threadPoolTaskExecutor.execute(() -> {
+                String url = stockInfoConfig.getMarketUrl() + String.join(",", codes);
 
-            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, this.httpEntity, String.class);
-            int statusCodeValue = responseEntity.getStatusCodeValue();
+                ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, this.httpEntity, String.class);
+                int statusCodeValue = responseEntity.getStatusCodeValue();
 
-            if (statusCodeValue != 200) {
-                log.error("当前时间: {}, 采集个股数据出现问题, HTTP状态码: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), statusCodeValue);
-                return;
-            }
+                if (statusCodeValue != 200) {
+                    log.error("当前时间: {}, 采集个股数据出现问题, HTTP状态码: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), statusCodeValue);
+                    return;
+                }
 
-            String jsData = responseEntity.getBody();
+                String jsData = responseEntity.getBody();
 
-            // 2.3 调用工具类解析响应数据 (个股)
-            List<StockRtInfo> list = parserStockInfoUtil.parser4StockOrMarketInfo(jsData, ParseType.ASHARE);
-            log.info("当前时间: {}, 采集个股数据: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
+                // 2.3 调用工具类解析响应数据 (个股)
+                List<StockRtInfo> list = parserStockInfoUtil.parser4StockOrMarketInfo(jsData, ParseType.ASHARE);
+                log.info("当前时间: {}, 采集个股数据: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
 
-            // 3 批量插入
-            int count = stockRtInfoMapper.insertBatch(list);
-            if (count > 0) {
-                log.info("当前时间: {}, 成功插入{}条个股数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
-                rabbitTemplate.convertAndSend("stockTopicExchange", "inner.stock", new Date());
-            } else log.error("当前时间: {}, 插入个股数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
-
+                // 3 批量插入
+                int count = stockRtInfoMapper.insertBatch(list);
+                if (count > 0) {
+                    log.info("当前时间: {}, 成功插入{}条个股数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
+                    rabbitTemplate.convertAndSend("stockTopicExchange", "inner.stock", new Date());
+                } else log.error("当前时间: {}, 插入个股数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            });
         });
     }
 
@@ -174,9 +180,13 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
             return;
         }
         // 4 使用 myBatis Mapper 批量入库
-        int count = stockBlockRtInfoMapper.insertBatch(list);
-        if (count > 0)
-            log.info("当前时间: {}, 成功插入{}条板块数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
-        else log.error("当前时间: {}, 插入板块数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+        Lists.partition(list, 20).forEach(batch -> {
+            threadPoolTaskExecutor.execute(() -> {
+                int count = stockBlockRtInfoMapper.insertBatch(list);
+                if (count > 0)
+                    log.info("当前时间: {}, 成功插入{}条板块数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
+                else log.error("当前时间: {}, 插入板块数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            });
+        });
     }
 }

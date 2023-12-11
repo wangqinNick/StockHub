@@ -31,3 +31,10 @@ mybatis:
 pagehelper:
   helper-dialect: mysql #指定分页数据库类型（方言）
   reasonable: true #合理查询超过最大页，则查询最后一页
+# 定时任务线程池基础参数
+task:
+  pool:
+    corePoolSize: 5 # 核心线程数
+    maxPoolSize: 20 # 设置最大线程数
+    keepAliveSeconds: 300 # 设置线程活跃时间，单位秒
+    queueCapacity: 100 # 设置队列容量

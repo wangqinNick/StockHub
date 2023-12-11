@@ -16,8 +16,9 @@ public class StockTimerTaskServiceImplTest {
     private StockTimerTaskService stockTimerTaskService;
 
     @Test
-    public void test01() {
+    public void test01() throws InterruptedException {
         stockTimerTaskService.getInnerMarketInfo();
+        Thread.sleep(5000); // 让主线程休眠, 等待子线程执行任务
     }
 
     @Test
