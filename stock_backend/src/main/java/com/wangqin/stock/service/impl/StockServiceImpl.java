@@ -37,7 +37,6 @@ import static com.wangqin.stock.constant.StockConstant.MOCK_DATE;
 @Slf4j
 public class StockServiceImpl implements StockService {
 
-
     @ApiModelProperty(hidden = true)
     @Autowired
     private StockMarketIndexInfoMapper stockMarketIndexInfoMapper;
@@ -403,6 +402,43 @@ public class StockServiceImpl implements StockService {
         // 2. SQL查询
         List<Stock4DayDomain> infos = stockRtInfoMapper.getStockInfo4Day(code, startDate, endDate);
 
+        return R.ok(infos);
+    }
+
+    /**
+     * 获取个股最新分时行情数据，主要包含：
+     * 开盘价、前收盘价、最新价、最高价、最低价、成交金额和成交量、交易时间信息;
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @Override
+    public R<StockRtDomain> getStockRtDetail(String code) {
+        // 1. 获取当前日期
+        Date lastDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+        // todo
+        lastDate = DateTime.parse("2022-01-05 10:34:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        // 2. 查询lastDate下股票信息
+        StockRtDomain stockRtDomain = stockRtInfoMapper.getStockRtDetail(code, lastDate);
+        return R.ok(stockRtDomain);
+    }
+
+    /**
+     * 个股交易流水行情数据查询--查询最新交易流水，按照交易时间降序取前10
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @Override
+    public R<List<SimpleStockRtDomain>> getStockSecond(String code) {
+        // 1. 获取当前日期
+        Date lastDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+        Date startDate = DateTimeUtil.getLastDate4Stock(DateTime.now().minusMinutes(10)).toDate();
+        // todo
+        lastDate = DateTime.parse("2022-01-05 10:34:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        startDate = DateTime.parse("2022-01-05 10:24:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        // 2. 查询lastDate下股票信息
+        List<SimpleStockRtDomain> infos = stockRtInfoMapper.getStockSecond(code, startDate, lastDate);
         return R.ok(infos);
     }
 }

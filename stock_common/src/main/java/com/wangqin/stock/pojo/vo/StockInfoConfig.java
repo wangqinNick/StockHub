@@ -27,4 +27,7 @@ public class StockInfoConfig {
     // 板块参数获取URL
     @ApiModelProperty(value = "板块参数获取URL", position = 5)
     private String blockUrl;
+    @ApiModelProperty(value = "采集外盘接口URL", position = 6)
+    // 采集外盘接口URL
+    private String outerUrl;
 }

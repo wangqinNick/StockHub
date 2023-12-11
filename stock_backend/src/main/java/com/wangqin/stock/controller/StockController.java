@@ -159,4 +159,27 @@ public class StockController {
     public R<List<Stock4DayDomain>> getDayKLineData(String code) {
         return stockService.getDayKLineData(code);
     }
+
+    /**
+     * 获取个股最新分时行情数据，主要包含：
+     * 开盘价、前收盘价、最新价、最高价、最低价、成交金额和成交量、交易时间信息;
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @GetMapping("/stock/screen/second/detail")
+    public R<StockRtDomain> getStockRtDetail(String code) {
+        return stockService.getStockRtDetail(code);
+    }
+
+    /**
+     * 个股交易流水行情数据查询--查询最新交易流水，按照交易时间降序取前10
+     *
+     * @param code 股票代码
+     * @return R
+     */
+    @GetMapping("/stock/screen/second")
+    public R<List<SimpleStockRtDomain>> getStockSecond(String code) {
+        return stockService.getStockSecond(code);
+    }
 }

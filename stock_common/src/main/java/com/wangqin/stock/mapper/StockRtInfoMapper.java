@@ -1,8 +1,6 @@
 package com.wangqin.stock.mapper;
 
-import com.wangqin.stock.pojo.domain.Stock4DayDomain;
-import com.wangqin.stock.pojo.domain.Stock4MinuteDomain;
-import com.wangqin.stock.pojo.domain.StockUpdownDomain;
+import com.wangqin.stock.pojo.domain.*;
 import com.wangqin.stock.pojo.entity.StockRtInfo;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
@@ -84,4 +82,27 @@ public interface StockRtInfoMapper {
      * @return 数据变动数量
      */
     int insertBatch(@Param("list") List<StockRtInfo> list);
+
+    /**
+     * 获取个股最新分时行情数据，主要包含：
+     * 开盘价、前收盘价、最新价、最高价、最低价、成交金额和成交量、交易时间信息;
+     *
+     * @param code     股票代码
+     * @param lastDate 查询时间点(分)
+     * @return Stock4MinuteDomain
+     */
+    StockRtDomain getStockRtDetail(@Param("code") String code,
+                                   @Param("lastDate") Date lastDate);
+
+    /**
+     * 个股交易流水行情数据查询--查询最新交易流水，按照交易时间降序取前10
+     *
+     * @param code      股票代码
+     * @param startDate 最新日期 - 10min
+     * @param lastDate  最新日期
+     * @return List<SimpleStockRtDomain>
+     */
+    List<SimpleStockRtDomain> getStockSecond(@Param("code") String code,
+                                             @Param("startDate") Date startDate,
+                                             @Param("lastDate") Date lastDate);
 }
