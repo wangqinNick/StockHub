@@ -3,10 +3,7 @@ package com.wangqin.stock.service.impl;
 import com.google.common.collect.Lists;
 import com.wangqin.stock.constant.ParseType;
 import com.wangqin.stock.constant.StockConstant;
-import com.wangqin.stock.mapper.StockBlockRtInfoMapper;
-import com.wangqin.stock.mapper.StockBusinessMapper;
-import com.wangqin.stock.mapper.StockMarketIndexInfoMapper;
-import com.wangqin.stock.mapper.StockRtInfoMapper;
+import com.wangqin.stock.mapper.*;
 import com.wangqin.stock.pojo.entity.StockBlockRtInfo;
 import com.wangqin.stock.pojo.entity.StockMarketIndexInfo;
 import com.wangqin.stock.pojo.entity.StockRtInfo;
@@ -59,6 +56,9 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
 
     @Autowired
     private StockBlockRtInfoMapper stockBlockRtInfoMapper;
+
+    @Autowired
+    private StockOuterMarketIndexInfoMapper stockOuterMarketIndexInfoMapper;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -188,5 +188,41 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
                 else log.error("当前时间: {}, 插入板块数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
             });
         });
+    }
+
+    /**
+     * 采集外盘数据执行
+     */
+    @Override
+    public void getOuterMarketInfos() {
+        //1.定义采集的url接口
+        String url = stockInfoConfig.getOuterUrl() + String.join(",", stockInfoConfig.getOuter());
+        //2.调用restTemplate采集数据
+        //2.1 组装请求头
+        //2.2 组装请求对象
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, this.httpEntity, String.class);
+        int statusCodeValue = responseEntity.getStatusCodeValue();
+        if (statusCodeValue != 200) {
+            log.error("当前时间: {}, 采集外盘大盘数据出现问题, HTTP状态码: {}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), statusCodeValue);
+            return;
+        }
+        String jsData = responseEntity.getBody();
+        // 3 解析数据
+        List<StockMarketIndexInfo> list = parserStockInfoUtil.parser4StockOrMarketInfo(jsData, ParseType.OUTER);
+        log.info("当前时间:{}, 采集的当前外盘大盘数据：{}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
+        //批量插入
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+
+        // 4 使用 myBatis Mapper 批量入库, 即采集完毕
+        int count = stockOuterMarketIndexInfoMapper.insertBatch(list);
+
+        if (count > 0) {
+            log.info("当前时间: {}, 成功插入{}条外盘大盘数据.", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), count);
+            // 大盘数据采集、插入完毕后, 通知backend模块刷新缓存
+            // 数据库 -> 缓存
+            rabbitTemplate.convertAndSend("stockTopicExchange", "inner.market", new Date());
+        } else log.error("当前时间: {}, 插入外盘大盘数据失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
     }
 }

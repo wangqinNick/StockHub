@@ -108,4 +108,11 @@ public interface StockService {
      * @return R
      */
     R<List<SimpleStockRtDomain>> getStockSecond(String code);
+
+    /**
+     * 国外大盘数据
+     *
+     * @return R
+     */
+    R<List<OuterMarketDomain>> getOuterIndexAll();
 }

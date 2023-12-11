@@ -44,4 +44,10 @@ public class StockJobHandler {
         stockTimerTaskService.getBlockIndex();
         System.out.println("定时任务，采集A股板块数据执行");
     }
+
+    @XxlJob("getStockOuterMarketInfos")
+    public void getOuterMarketInfos() {
+        stockTimerTaskService.getOuterMarketInfos();
+        System.out.println("定时任务，采集外盘数据执行");
+    }
 }

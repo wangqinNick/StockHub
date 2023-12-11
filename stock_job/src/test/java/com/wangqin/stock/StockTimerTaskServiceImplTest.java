@@ -31,4 +31,9 @@ public class StockTimerTaskServiceImplTest {
         stockTimerTaskService.getBlockIndex();
     }
 
+    @Test
+    public void test04() {
+        stockTimerTaskService.getOuterMarketInfos();
+    }
+
 }

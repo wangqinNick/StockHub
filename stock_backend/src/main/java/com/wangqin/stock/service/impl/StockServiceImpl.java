@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wangqin.stock.mapper.StockBlockRtInfoMapper;
 import com.wangqin.stock.mapper.StockMarketIndexInfoMapper;
+import com.wangqin.stock.mapper.StockOuterMarketIndexInfoMapper;
 import com.wangqin.stock.mapper.StockRtInfoMapper;
 import com.wangqin.stock.pojo.domain.*;
 import com.wangqin.stock.pojo.vo.StockInfoConfig;
@@ -53,8 +54,10 @@ public class StockServiceImpl implements StockService {
     @Autowired
     private StockRtInfoMapper stockRtInfoMapper;
 
-    @ApiModelProperty(hidden = true)
+    @Autowired
+    private StockOuterMarketIndexInfoMapper stockOuterMarketIndexInfoMapper;
 
+    @ApiModelProperty(hidden = true)
     @Autowired
     private Cache<String, Object> caffeineCache;
 
@@ -440,5 +443,33 @@ public class StockServiceImpl implements StockService {
         // 2. 查询lastDate下股票信息
         List<SimpleStockRtDomain> infos = stockRtInfoMapper.getStockSecond(code, startDate, lastDate);
         return R.ok(infos);
+    }
+
+    /**
+     * 获取国外大盘数据
+     *
+     * @return R
+     */
+    @Override
+    public R<List<OuterMarketDomain>> getOuterIndexAll() {
+        // 1. 获取当前日期
+//        Date lastDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+//        // todo
+//        lastDate = DateTime.parse("2022-05-18 15:58:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+//        // 2. 获取外盘代码
+//        List<String> outers = stockInfoConfig.getOuter();
+//        // 2. 查询
+//        List<OuterMarketDomain> infos = stockOuterMarketIndexInfoMapper.getOuterIndexAll(lastDate, outers);
+//        R<List<OuterMarketDomain>> res = R.ok(infos);
+//        return res;
+
+        List<String> outers = stockInfoConfig.getOuter();
+        //2.获取最近股票交易日期
+        Date lastDate = DateTimeUtil.getLastDate4Stock(DateTime.now()).toDate();
+        //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
+        lastDate = DateTime.parse("2022-05-18 15:58:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //3.将获取的java Date传入接口
+        List<OuterMarketDomain> list = stockOuterMarketIndexInfoMapper.getOuterIndexAll(outers, lastDate);
+        return R.ok(list);
     }
 }

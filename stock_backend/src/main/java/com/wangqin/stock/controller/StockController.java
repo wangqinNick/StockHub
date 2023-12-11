@@ -182,4 +182,15 @@ public class StockController {
     public R<List<SimpleStockRtDomain>> getStockSecond(String code) {
         return stockService.getStockSecond(code);
     }
+
+    /**
+     * 国外大盘数据
+     *
+     * @return R
+     */
+    @GetMapping("/external/index")
+    public R<List<OuterMarketDomain>> outerIndexAll() {
+        R<List<OuterMarketDomain>> res = stockService.getOuterIndexAll();
+        return res;
+    }
 }

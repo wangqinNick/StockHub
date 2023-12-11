@@ -26,6 +26,21 @@
         from stock_outer_market_index_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
+    <select id="getOuterIndexAll" resultType="com.wangqin.stock.pojo.domain.OuterMarketDomain">
+        SELECT
+        smi.market_code AS code,
+        smi.market_name AS name,
+        smi.cur_point AS curPoint,
+        smi.updown AS upDown,
+        smi.rose AS rose,
+        smi.cur_time AS curTime
+        FROM stock_outer_market_index_info AS smi
+        WHERE smi.market_code IN
+        <foreach collection="marketIds" item="marketId" open="(" separator="," close=")">
+            #{marketId}
+        </foreach>
+        AND smi.cur_time=#{lastDate}
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_outer_market_index_info
@@ -60,6 +75,24 @@
                 <if test="rose != null">#{rose,jdbcType=DECIMAL},</if>
                 <if test="curTime != null">#{curTime,jdbcType=TIMESTAMP},</if>
         </trim>
+    </insert>
+    <insert id="insertBatch">
+        insert IGNORE into stock_outer_market_index_info
+        ( id,market_code,
+         market_name
+        ,cur_point
+        ,updown,rose
+        ,cur_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id,jdbcType=BIGINT},
+            #{item.marketCode,jdbcType=CHAR},
+            #{item.marketName,jdbcType=VARCHAR},
+            #{item.curPoint,jdbcType=DECIMAL},
+            #{item.updown,jdbcType=DECIMAL},
+            #{item.rose,jdbcType=DECIMAL},
+            #{item.curTime,jdbcType=TIMESTAMP})
+        </foreach>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.wangqin.stock.pojo.entity.StockOuterMarketIndexInfo">
         update stock_outer_market_index_info
