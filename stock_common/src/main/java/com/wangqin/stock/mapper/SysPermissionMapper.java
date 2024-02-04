@@ -1,6 +1,9 @@
 package com.wangqin.stock.mapper;
 
 import com.wangqin.stock.pojo.entity.SysPermission;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author qinwang
@@ -21,5 +24,25 @@ public interface SysPermissionMapper {
     int updateByPrimaryKeySelective(SysPermission record);
 
     int updateByPrimaryKey(SysPermission record);
+
+    /**
+     * 获取所有权限集合
+     * @return
+     */
+    List<SysPermission> findAll();
+
+    /**
+     * 根据权限父类id查询对应子集权限
+     * @param permissionId
+     * @return
+     */
+    int findChildrenCountByParentId(@Param("permissionId") Long permissionId);
+
+    /**
+     * 根据用户id查询用户信息
+     * @param userId
+     * @return
+     */
+    List<SysPermission> getPermissionByUserId(@Param("userId") Long userId);
 
 }

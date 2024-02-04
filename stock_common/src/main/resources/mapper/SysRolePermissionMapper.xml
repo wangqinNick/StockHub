@@ -49,6 +49,31 @@
                 <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
         </trim>
     </insert>
+    <insert id="addRolePermissionBatch">
+        insert into sys_role_permission
+        (id,role_id,permission_id,create_time)
+        values
+        <foreach collection="rps" item="rp" separator=",">
+            (#{rp.id},#{rp.roleId},#{rp.permissionId},#{rp.createTime})
+        </foreach>
+    </insert>
+
+    <select id="getPermissionIdsByRoleId" resultType="java.lang.Long">
+        SELECT
+            rp.permission_id
+        FROM
+            sys_role_permission AS rp
+        WHERE
+            rp.role_id = #{roleId}
+    </select>
+
+    <delete id="deleteByRoleId">
+        DELETE FROM sys_role_permission WHERE role_id=#{roleId}
+    </delete>
+    <delete id="deleteByPermissionId">
+        DELETE FROM sys_role_permission WHERE permission_id=#{permissionId}
+    </delete>
+
     <update id="updateByPrimaryKeySelective" parameterType="com.wangqin.stock.pojo.entity.SysRolePermission">
         update sys_role_permission
         <set>

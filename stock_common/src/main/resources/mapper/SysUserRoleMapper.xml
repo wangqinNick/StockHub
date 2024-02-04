@@ -5,10 +5,10 @@
 <mapper namespace="com.wangqin.stock.mapper.SysUserRoleMapper">
 
     <resultMap id="BaseResultMap" type="com.wangqin.stock.pojo.entity.SysUserRole">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="userId" column="user_id" jdbcType="BIGINT"/>
-            <result property="roleId" column="role_id" jdbcType="BIGINT"/>
-            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="roleId" column="role_id" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -18,58 +18,82 @@
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List" />
+        <include refid="Base_Column_List"/>
         from sys_user_role
-        where  id = #{id,jdbcType=BIGINT} 
+        where id = #{id,jdbcType=BIGINT}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-        delete from sys_user_role
-        where  id = #{id,jdbcType=BIGINT} 
+        delete
+        from sys_user_role
+        where id = #{id,jdbcType=BIGINT}
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.wangqin.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.wangqin.stock.pojo.entity.SysUserRole"
+            useGeneratedKeys="true">
         insert into sys_user_role
-        ( id,user_id,role_id
-        ,create_time)
-        values (#{id,jdbcType=BIGINT},#{userId,jdbcType=BIGINT},#{roleId,jdbcType=BIGINT}
-        ,#{createTime,jdbcType=TIMESTAMP})
+        ( id, user_id, role_id
+        , create_time)
+        values ( #{id,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{roleId,jdbcType=BIGINT}
+               , #{createTime,jdbcType=TIMESTAMP})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.wangqin.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id"
+            parameterType="com.wangqin.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
         insert into sys_user_role
         <trim prefix="(" suffix=")" suffixOverrides=",">
-                <if test="id != null">id,</if>
-                <if test="userId != null">user_id,</if>
-                <if test="roleId != null">role_id,</if>
-                <if test="createTime != null">create_time,</if>
+            <if test="id != null">id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="roleId != null">role_id,</if>
+            <if test="createTime != null">create_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-                <if test="id != null">#{id,jdbcType=BIGINT},</if>
-                <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
-                <if test="roleId != null">#{roleId,jdbcType=BIGINT},</if>
-                <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="id != null">#{id,jdbcType=BIGINT},</if>
+            <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
+            <if test="roleId != null">#{roleId,jdbcType=BIGINT},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.wangqin.stock.pojo.entity.SysUserRole">
         update sys_user_role
         <set>
-                <if test="userId != null">
-                    user_id = #{userId,jdbcType=BIGINT},
-                </if>
-                <if test="roleId != null">
-                    role_id = #{roleId,jdbcType=BIGINT},
-                </if>
-                <if test="createTime != null">
-                    create_time = #{createTime,jdbcType=TIMESTAMP},
-                </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="roleId != null">
+                role_id = #{roleId,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
         </set>
-        where   id = #{id,jdbcType=BIGINT} 
+        where id = #{id,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.wangqin.stock.pojo.entity.SysUserRole">
         update sys_user_role
-        set 
-            user_id =  #{userId,jdbcType=BIGINT},
-            role_id =  #{roleId,jdbcType=BIGINT},
-            create_time =  #{createTime,jdbcType=TIMESTAMP}
-        where   id = #{id,jdbcType=BIGINT} 
+        set user_id     = #{userId,jdbcType=BIGINT},
+            role_id     = #{roleId,jdbcType=BIGINT},
+            create_time = #{createTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=BIGINT}
     </update>
+
+    <select id="findRoleIdsByUserId" resultType="long">
+        SELECT ur.role_id
+        FROM sys_user_role AS ur
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <delete id="deleteByUserId">
+        DELETE
+        FROM sys_user_role
+        WHERE user_id = #{userId}
+    </delete>
+
+    <insert id="insertBatch">
+        insert into sys_user_role
+        ( id,user_id,role_id,create_time) values
+        <foreach collection="urs" item="ur" separator=",">
+            (#{ur.id,jdbcType=BIGINT},#{ur.userId,jdbcType=BIGINT},#{ur.roleId,jdbcType=BIGINT}
+            ,#{ur.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+
 </mapper>

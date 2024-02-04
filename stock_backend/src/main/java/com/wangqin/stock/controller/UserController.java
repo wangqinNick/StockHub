@@ -2,15 +2,16 @@ package com.wangqin.stock.controller;
 
 import com.wangqin.stock.pojo.entity.SysUser;
 import com.wangqin.stock.service.UserService;
-import com.wangqin.stock.vo.request.LoginReqVo;
-import com.wangqin.stock.vo.response.LoginRespVo;
 import com.wangqin.stock.vo.response.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -31,14 +32,14 @@ public class UserController {
         return this.userService.getUserByUsername(username);
     }
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "LoginReqVo", name = "loginReqVo", value = "", required = true)
-    })
-    @ApiOperation(value = "User login", notes = "", httpMethod = "POST")
-    @PostMapping("/login")
-    public R<LoginRespVo> login(@RequestBody LoginReqVo loginReqVo) {
-        return this.userService.login(loginReqVo);
-    }
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(paramType = "body", dataType = "LoginReqVo", name = "loginReqVo", value = "", required = true)
+//    })
+//    @ApiOperation(value = "User login", notes = "", httpMethod = "POST")
+//    @PostMapping("/login")
+//    public R<LoginRespVo> login(@RequestBody LoginReqVo loginReqVo) {
+//        return this.userService.login(loginReqVo);
+//    }
 
     @ApiOperation(value = "Generate captcha code", notes = "", httpMethod = "GET")
     @GetMapping("/captcha")
